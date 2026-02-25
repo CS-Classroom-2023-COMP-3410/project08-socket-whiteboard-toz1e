@@ -55,9 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
     boardState.push(data);
     drawLine(data.x0, data.y0, data.x1, data.y1, data.color, data.size);
   });
+  socket.on('clear', () => {
+    boardState = [];
+    redrawCanvas();
+  });
 
-  socket.on('userCount', (count) => {
-    userCount.textContent = `Users: ${count}`;
+  socket.on('currentUsers', (count) => {
+    userCount.textContent = count;
   });
 
   // Canvas event handlers
@@ -99,14 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // TODO: Get current coordinates
     const { x, y } = getCoordinates(e);
     // TODO: Emit 'draw' event to the server with drawing data
-    socket.emit('draw', {
-      x0: lastX,
-      y0: lastY,
-      x1: x,
-      y1: y,
-      color: colorInput.value,
+    socket.emit('draw', { 
+      x0: lastX, 
+      y0: lastY, 
+      x1: x, 
+      y1: y, 
+      color: colorInput.value, 
       size: brushSizeInput.value
-    });
+     });
     // TODO: Update last position
     lastX = x;
     lastY = y;
@@ -148,7 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // HINT: For touch events, use e.touches[0] or e.changedTouches[0]
     // HINT: For mouse events, use e.offsetX and e.offsetY
     if (e.touches && e.touches.length > 0) {
-      return { x: e.touches[0].clientX - canvas.offsetLeft, y: e.touches[0].clientY - canvas.offsetTop };
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
     } else {
       return { x: e.offsetX, y: e.offsetY };
     }
